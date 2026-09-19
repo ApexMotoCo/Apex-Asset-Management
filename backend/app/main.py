@@ -22,7 +22,7 @@ from .models import (
     MaintenanceRecord, ITEquipmentSpec, VehicleSpec, User, UserRole, Invite
 )
 from .schemas import (
-    AssetCreate, AssetUpdate, AssetResponse, CategoryCreate,
+    AssetCreate, AssetUpdate, AssetResponse, CategoryCreate, CategoryResponse,
     EmployeeCreate, EmployeeResponse, EmployeeUpdate,
     AssetHandoverCreate, AssetHandoverReturn, AssetHandoverResponse,
     MaintenanceRecordCreate, MaintenanceRecordUpdate, MaintenanceRecordResponse,
@@ -45,13 +45,37 @@ app = FastAPI(title="APEX Asset Management System", description="Enterprise-grad
 def startup():
     db = SessionLocal()
     try:
-        for email, role in [(SUPER_USER_EMAIL, "super_admin"), ("business@apexingoodcompany.co.uk", "admin")]:
-            existing = db.query(User).filter(User.email == email).first()
+        for email in AUTHORIZED_ADMINS:
+            role = "super_admin" if email.lower() == SUPER_USER_EMAIL.lower() else "admin"
+            existing = db.query(User).filter(User.email == email.lower()).first()
             if not existing:
-                new_user = User(email=email, role=role, can_view_dashboard=True, can_manage_assets=True,
-                    can_manage_employees=True, can_manage_handovers=True, can_manage_maintenance=True,
-                    can_view_audit_logs=(role == "super_admin"), can_manage_users=(role == "super_admin"))
-                db.add(new_user)
+                db.add(User(
+                    email=email.lower(),
+                    role=role,
+                    can_view_dashboard=True,
+                    can_manage_assets=True,
+                    can_manage_employees=True,
+                    can_manage_handovers=True,
+                    can_manage_maintenance=True,
+                    can_view_audit_logs=(role == "super_admin"),
+                    can_manage_users=(role == "super_admin"),
+                    is_active=True,
+                    last_login=None,
+                    disabled_at=None,
+                    disabled_reason=None,
+                ))
+            else:
+                existing.role = role
+                existing.can_view_dashboard = True
+                existing.can_manage_assets = True
+                existing.can_manage_employees = True
+                existing.can_manage_handovers = True
+                existing.can_manage_maintenance = True
+                existing.can_view_audit_logs = (role == "super_admin")
+                existing.can_manage_users = (role == "super_admin")
+                existing.is_active = True
+                existing.disabled_at = None
+                existing.disabled_reason = None
         db.commit()
     finally:
         db.close()
@@ -72,16 +96,31 @@ def health(): return {"status": "healthy"}
 @app.post("/login", response_model=LoginResponse)
 def login(request: LoginRequest, db: Session = Depends(get_db)):
     email = request.email.strip().lower()
-    if email not in AUTHORIZED_ADMINS:
+    if email not in {allowed.lower() for allowed in AUTHORIZED_ADMINS}:
         raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Unauthorized email address")
     user = db.query(User).filter(User.email == email).first()
-    if user and not user.is_active:
+    if not user:
+        role = "super_admin" if email == SUPER_USER_EMAIL.lower() else "admin"
+        user = User(
+            email=email,
+            role=role,
+            can_view_dashboard=True,
+            can_manage_assets=True,
+            can_manage_employees=True,
+            can_manage_handovers=True,
+            can_manage_maintenance=True,
+            can_view_audit_logs=(role == "super_admin"),
+            can_manage_users=(role == "super_admin"),
+            is_active=True,
+        )
+        db.add(user)
+        db.flush()
+    if not user.is_active:
         raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="This user account is disabled")
-    if user:
-        user.last_login = datetime.utcnow()
-        user.disabled_at = None
-        user.disabled_reason = None
-        db.commit()
+    user.last_login = datetime.utcnow()
+    user.disabled_at = None
+    user.disabled_reason = None
+    db.commit()
     log_audit(db=db, email=email, action="LOGIN", resource_type="SYSTEM", resource_name="Admin Login", details="User logged in successfully")
     access_token = create_access_token(data={"sub": email}, expires_delta=timedelta(minutes=ACCESS_TOKEN_EXPIRE_MINUTES))
     return {"access_token": access_token, "token_type": "bearer", "email": email}
