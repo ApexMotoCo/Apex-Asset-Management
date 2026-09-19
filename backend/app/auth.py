@@ -68,17 +68,16 @@ def verify_token(authorization: str = Header(None)) -> str:
             raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Invalid token")
         email = email.strip().lower()
 
-        # This check also enforces the configured inactivity policy. It does not
-        # update last_login, so API polling cannot keep an inactive account alive.
-        if email not in AUTHORIZED_ADMINS:
-            db = SessionLocal()
-            try:
-                from .models import User
-                user = db.query(User).filter(User.email == email, User.is_active == True).first()
-                if not user:
-                    raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Unauthorized email")
-            finally:
-                db.close()
+        db = SessionLocal()
+        try:
+            from .models import User
+            user = db.query(User).filter(User.email == email).first()
+            if not user:
+                raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Unauthorized email")
+            if not user.is_active:
+                raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Account is disabled")
+        finally:
+            db.close()
 
         return email
     except HTTPException:
