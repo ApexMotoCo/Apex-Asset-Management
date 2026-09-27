@@ -29,7 +29,7 @@ function CategoryForm({ onCategoryCreated, apiUrl, token }) {
         headers: { Authorization: `Bearer ${token}` }
       });
       setFormData({ name: '', description: '' });
-      setSuccess('Category created successfully! 🎉');
+      setSuccess('Category created successfully! ');
       onCategoryCreated();
       setTimeout(() => setSuccess(''), 3000);
     } catch (err) {
@@ -50,7 +50,7 @@ function CategoryForm({ onCategoryCreated, apiUrl, token }) {
           fontWeight: '600',
           marginBottom: '1rem'
         }}>
-          ⚠️ {error}
+          WARNING: {error}
         </div>
       )}
       {success && (
@@ -63,7 +63,7 @@ function CategoryForm({ onCategoryCreated, apiUrl, token }) {
           fontWeight: '600',
           marginBottom: '1rem'
         }}>
-          ✓ {success}
+          OK: {success}
         </div>
       )}
 
@@ -92,7 +92,7 @@ function CategoryForm({ onCategoryCreated, apiUrl, token }) {
       </div>
 
       <button type="submit" disabled={loading} style={{ marginTop: '0.5rem' }}>
-        {loading ? 'Creating...' : '➕ Create Category'}
+        {loading ? 'Creating...' : 'Create Category'}
       </button>
     </form>
   );

@@ -1,69 +1,327 @@
-from pydantic import BaseModel
-from datetime import datetime, date
-from typing import Optional, List
+from pydantic import BaseModel, EmailStr, Field
+from datetime import datetime
+from typing import Optional
 
 class CategoryCreate(BaseModel):
     name: str
     description: Optional[str] = None
+
 class CategoryResponse(BaseModel):
-    id: int; name: str; description: Optional[str]; created_at: datetime
-    class Config: from_attributes = True
-
-class EmployeeCreate(BaseModel):
-    name: str; email: str; department: str; job_title: str; phone: Optional[str] = None; start_date: date
-class EmployeeUpdate(BaseModel):
-    name: Optional[str] = None; department: Optional[str] = None; job_title: Optional[str] = None; phone: Optional[str] = None; end_date: Optional[date] = None; is_active: Optional[bool] = None
-class EmployeeResponse(BaseModel):
-    id: int; name: str; email: str; department: str; job_title: str; phone: Optional[str]; start_date: date; end_date: Optional[date]; is_active: bool; created_at: datetime
-    class Config: from_attributes = True
-
-class ITEquipmentSpecCreate(BaseModel):
-    cpu: Optional[str] = None; ram_gb: Optional[int] = None; storage_gb: Optional[int] = None; gpu: Optional[str] = None; operating_system: Optional[str] = None; hostname: Optional[str] = None; ip_address: Optional[str] = None; mac_address: Optional[str] = None; device_id: Optional[str] = None; intune_status: Optional[str] = None
-class ITEquipmentSpecResponse(BaseModel):
-    id: int; asset_id: int; cpu: Optional[str]; ram_gb: Optional[int]; storage_gb: Optional[int]; gpu: Optional[str]; operating_system: Optional[str]; hostname: Optional[str]; ip_address: Optional[str]; mac_address: Optional[str]; device_id: Optional[str]; intune_status: Optional[str]; last_check_in: Optional[datetime]
-    class Config: from_attributes = True
+    id: int
+    name: str
+    description: Optional[str]
+    created_at: datetime
+    class Config:
+        from_attributes = True
 
 class AssetCreate(BaseModel):
-    name: str; description: Optional[str] = None; category_id: int; asset_type: str = "other"; make_model: Optional[str] = None; serial_number: str; purchase_date: date; purchase_price: float; current_value: float; warranty_expiry: Optional[date] = None; condition: str = "good"; location: str = "APEX HUB"; assigned_employee_id: Optional[int] = None; status: str = "available"; notes: Optional[str] = None; it_specs: Optional[ITEquipmentSpecCreate] = None
+    name: str
+    description: Optional[str] = None
+    category_id: int
+    serial_number: str
+    purchase_date: datetime
+    value: float
+    location: str = "APEX HUB"
+    status: str = "active"
+    lifecycle_status: str = "In Stock"
+    health_status: str = "Healthy"
+    warranty_provider: Optional[str] = None
+    warranty_start_date: Optional[datetime] = None
+    warranty_expiry_date: Optional[datetime] = None
+    warranty_reference: Optional[str] = None
+    warranty_notes: Optional[str] = None
+    expected_replacement_date: Optional[datetime] = None
+    replacement_priority: str = "Normal"
+    replacement_reason: Optional[str] = None
+    estimated_replacement_cost: float = 0.0
+    replacement_notes: Optional[str] = None
+
 class AssetUpdate(BaseModel):
-    name: Optional[str] = None; description: Optional[str] = None; condition: Optional[str] = None; location: Optional[str] = None; assigned_employee_id: Optional[int] = None; status: Optional[str] = None; current_value: Optional[float] = None; notes: Optional[str] = None
+    name: Optional[str] = None
+    description: Optional[str] = None
+    category_id: Optional[int] = None
+    serial_number: Optional[str] = None
+    purchase_date: Optional[datetime] = None
+    value: Optional[float] = None
+    location: Optional[str] = None
+    status: Optional[str] = None
+    lifecycle_status: Optional[str] = None
+    health_status: Optional[str] = None
+    warranty_provider: Optional[str] = None
+    warranty_start_date: Optional[datetime] = None
+    warranty_expiry_date: Optional[datetime] = None
+    warranty_reference: Optional[str] = None
+    warranty_notes: Optional[str] = None
+    expected_replacement_date: Optional[datetime] = None
+    replacement_priority: Optional[str] = None
+    replacement_reason: Optional[str] = None
+    estimated_replacement_cost: Optional[float] = None
+    replacement_notes: Optional[str] = None
+    assigned_user_id: Optional[int] = None
+
+class UserSummary(BaseModel):
+    id: int
+    email: str
+    full_name: str
+    role: str
+    is_active: bool
+    location: Optional[str]
+    class Config:
+        from_attributes = True
+
 class AssetResponse(BaseModel):
-    id: int; asset_id: str; name: str; description: Optional[str]; category_id: int; asset_type: str; make_model: Optional[str]; serial_number: str; purchase_date: date; purchase_price: float; current_value: float; warranty_expiry: Optional[date]; condition: str; location: str; assigned_employee_id: Optional[int]; status: str; notes: Optional[str]; created_at: datetime; updated_at: datetime
-    class Config: from_attributes = True
+    id: int
+    asset_tag: str
+    qr_token: str
+    name: str
+    description: Optional[str]
+    category_id: int
+    serial_number: str
+    purchase_date: datetime
+    value: float
+    location: str
+    status: str
+    lifecycle_status: str
+    health_status: str
+    warranty_provider: Optional[str]
+    warranty_start_date: Optional[datetime]
+    warranty_expiry_date: Optional[datetime]
+    warranty_reference: Optional[str]
+    warranty_notes: Optional[str]
+    warranty_status: str
+    expected_replacement_date: Optional[datetime]
+    replacement_priority: str
+    replacement_reason: Optional[str]
+    estimated_replacement_cost: float
+    replacement_notes: Optional[str]
+    assigned_user_id: Optional[int]
+    created_at: datetime
+    updated_at: datetime
+    category: CategoryResponse
+    assigned_user: Optional[UserSummary]
+    class Config:
+        from_attributes = True
 
-class AssetHandoverCreate(BaseModel):
-    asset_id: int; employee_id: int; condition_at_handover: str; accessories: Optional[str] = None; notes: Optional[str] = None
-class AssetHandoverReturn(BaseModel):
-    condition_at_return: str; notes: Optional[str] = None
-class AssetHandoverResponse(BaseModel):
-    id: int; asset_id: int; employee_id: int; handover_date: datetime; return_date: Optional[datetime]; condition_at_handover: str; accessories: Optional[str]; notes: Optional[str]; signature_confirmed: bool; is_active: bool
-    class Config: from_attributes = True
+class AssignmentResponse(BaseModel):
+    id: int
+    asset_id: int
+    user_id: Optional[int]
+    action: str
+    location: str
+    assigned_at: datetime
+    assigned_by: Optional[str]
+    notes: Optional[str]
+    user: Optional[UserSummary]
+    class Config:
+        from_attributes = True
 
-class MaintenanceRecordCreate(BaseModel):
-    asset_id: int; issue_description: str; repair_company: Optional[str] = None; estimated_cost: Optional[float] = None
-class MaintenanceRecordUpdate(BaseModel):
-    actual_cost: Optional[float] = None; date_sent: Optional[datetime] = None; date_returned: Optional[datetime] = None; fault_description: Optional[str] = None; resolution: Optional[str] = None; warranty_repair: Optional[bool] = None; downtime_days: Optional[int] = None; status: Optional[str] = None
-class MaintenanceRecordResponse(BaseModel):
-    id: int; asset_id: int; issue_description: str; reported_date: datetime; repair_company: Optional[str]; estimated_cost: Optional[float]; actual_cost: Optional[float]; date_sent: Optional[datetime]; date_returned: Optional[datetime]; fault_description: Optional[str]; resolution: Optional[str]; warranty_repair: bool; downtime_days: Optional[int]; status: str
-    class Config: from_attributes = True
+class AssignAssetRequest(BaseModel):
+    user_id: Optional[int] = None
+    location: str = "APEX HUB"
+    notes: Optional[str] = None
 
-class DashboardStats(BaseModel):
-    total_assets: int; total_asset_value: float; book_value: float; assets_due_replacement: int; warranty_expiring_soon: int; assets_in_repair: int; assets_missing: int; apex_hub_assets: int = 0; apex_hub_value: float = 0; assigned_assets: int = 0; available_assets: int = 0; asset_health: dict = {}; recent_activities: List[dict]
-
-class InviteCreate(BaseModel): email: str; role: str = "admin"
-class InviteAccept(BaseModel): token: str; password: str
-class InviteValidate(BaseModel): valid: bool; email: str; role: str
-class InviteAcceptResponse(BaseModel): status: str; access_token: str; token_type: str; email: str
-class InviteResponse(BaseModel):
-    id: int; email: str; token: str; role: str; invited_by: str; created_at: datetime; expires_at: datetime; is_used: bool
-    class Config: from_attributes = True
-
-class UserCreate(BaseModel): email: str; role: str = "admin"
-class UserUpdate(BaseModel):
-    role: Optional[str] = None; can_view_dashboard: Optional[bool] = None; can_manage_assets: Optional[bool] = None; can_manage_employees: Optional[bool] = None; can_manage_handovers: Optional[bool] = None; can_manage_maintenance: Optional[bool] = None; can_view_audit_logs: Optional[bool] = None; can_manage_users: Optional[bool] = None; is_active: Optional[bool] = None
-class UserResponse(BaseModel):
-    id: int; email: str; role: str; can_view_dashboard: bool; can_manage_assets: bool; can_manage_employees: bool; can_manage_handovers: bool; can_manage_maintenance: bool; can_view_audit_logs: bool; can_manage_users: bool; is_active: bool; last_login: Optional[datetime] = None; disabled_at: Optional[datetime] = None; disabled_reason: Optional[str] = None; created_at: datetime
-    class Config: from_attributes = True
 class AuditLogResponse(BaseModel):
-    id: int; email: str; action: str; resource_type: str; resource_id: Optional[int]; resource_name: str; details: str; created_at: datetime
-    class Config: from_attributes = True
+    id: int
+    email: str
+    action: str
+    resource_type: str
+    resource_id: Optional[int]
+    resource_name: str
+    details: str
+    created_at: datetime
+    class Config:
+        from_attributes = True
+
+class UserCreate(BaseModel):
+    email: EmailStr
+    full_name: str
+    phone: Optional[str] = None
+    location: str = "APEX HUB"
+    bike_interests: Optional[str] = None
+    bio: Optional[str] = None
+    role: str = "member"
+
+class UserUpdate(BaseModel):
+    full_name: Optional[str] = None
+    phone: Optional[str] = None
+    bio: Optional[str] = None
+    profile_image_url: Optional[str] = None
+    location: Optional[str] = None
+    bike_interests: Optional[str] = None
+    membership_tier: Optional[str] = None
+
+class UserAdminUpdate(BaseModel):
+    full_name: Optional[str] = None
+    phone: Optional[str] = None
+    bio: Optional[str] = None
+    profile_image_url: Optional[str] = None
+    location: Optional[str] = None
+    bike_interests: Optional[str] = None
+    membership_tier: Optional[str] = None
+    role: Optional[str] = None
+    is_active: Optional[bool] = None
+    is_verified: Optional[bool] = None
+
+class UserResponse(BaseModel):
+    id: int
+    email: str
+    full_name: str
+    phone: Optional[str]
+    bio: Optional[str]
+    profile_image_url: Optional[str]
+    membership_tier: str
+    role: str
+    is_active: bool
+    is_verified: bool
+    location: Optional[str]
+    bike_interests: Optional[str]
+    join_date: datetime
+    last_login: Optional[datetime]
+    invited_at: Optional[datetime]
+    invite_expires_at: Optional[datetime]
+    created_at: datetime
+    updated_at: datetime
+    class Config:
+        from_attributes = True
+
+class UserPublicResponse(BaseModel):
+    id: int
+    full_name: str
+    bio: Optional[str]
+    profile_image_url: Optional[str]
+    membership_tier: str
+    location: Optional[str]
+    bike_interests: Optional[str]
+    join_date: datetime
+    class Config:
+        from_attributes = True
+
+class LoginRequest(BaseModel):
+    email: EmailStr
+    password: Optional[str] = None
+
+class LoginResponse(BaseModel):
+    access_token: str
+    token_type: str
+    email: str
+    role: str
+
+class AcceptInviteRequest(BaseModel):
+    token: str
+    password: str
+
+class InviteResponse(BaseModel):
+    message: str
+    email: str
+    invite_url: Optional[str] = None
+
+
+class SupplierCreate(BaseModel):
+    name: str
+    contact_name: Optional[str] = None
+    email: Optional[EmailStr] = None
+    phone: Optional[str] = None
+    website: Optional[str] = None
+    address: Optional[str] = None
+    notes: Optional[str] = None
+    is_active: bool = True
+
+class SupplierUpdate(BaseModel):
+    name: Optional[str] = None
+    contact_name: Optional[str] = None
+    email: Optional[EmailStr] = None
+    phone: Optional[str] = None
+    website: Optional[str] = None
+    address: Optional[str] = None
+    notes: Optional[str] = None
+    is_active: Optional[bool] = None
+
+class PurchaseOrderCreate(BaseModel):
+    order_number: str
+    supplier_id: int
+    status: str = "Draft"
+    order_date: Optional[datetime] = None
+    expected_date: Optional[datetime] = None
+    received_date: Optional[datetime] = None
+    notes: Optional[str] = None
+    items: list[dict] = []
+
+class PurchaseOrderUpdate(BaseModel):
+    status: Optional[str] = None
+    expected_date: Optional[datetime] = None
+    received_date: Optional[datetime] = None
+    notes: Optional[str] = None
+
+
+class AssetDocumentCreate(BaseModel):
+    asset_id: int
+    title: str
+    document_type: str = "Other"
+    reference: Optional[str] = None
+    issued_date: Optional[datetime] = None
+    expiry_date: Optional[datetime] = None
+    document_url: Optional[str] = None
+    notes: Optional[str] = None
+
+class AssetDocumentUpdate(BaseModel):
+    title: Optional[str] = None
+    document_type: Optional[str] = None
+    reference: Optional[str] = None
+    issued_date: Optional[datetime] = None
+    expiry_date: Optional[datetime] = None
+    document_url: Optional[str] = None
+    notes: Optional[str] = None
+
+class ComplianceRecordCreate(BaseModel):
+    asset_id: int
+    compliance_type: str = "Inspection"
+    status: str = "Required"
+    due_date: Optional[datetime] = None
+    completed_date: Optional[datetime] = None
+    reference: Optional[str] = None
+    notes: Optional[str] = None
+
+class ComplianceRecordUpdate(BaseModel):
+    compliance_type: Optional[str] = None
+    status: Optional[str] = None
+    due_date: Optional[datetime] = None
+    completed_date: Optional[datetime] = None
+    reference: Optional[str] = None
+    notes: Optional[str] = None
+
+
+class ExpenseCreate(BaseModel):
+    asset_id: Optional[int] = None
+    supplier_id: Optional[int] = None
+    category: str = "Other"
+    description: str
+    amount: float = Field(default=0.0, ge=0)
+    expense_date: Optional[datetime] = None
+    reference: Optional[str] = None
+    notes: Optional[str] = None
+
+class ExpenseUpdate(BaseModel):
+    asset_id: Optional[int] = None
+    supplier_id: Optional[int] = None
+    category: Optional[str] = None
+    description: Optional[str] = None
+    amount: Optional[float] = Field(default=None, ge=0)
+    expense_date: Optional[datetime] = None
+    reference: Optional[str] = None
+    notes: Optional[str] = None
+
+class BudgetCreate(BaseModel):
+    name: str
+    category: str = "General"
+    year: int
+    month: Optional[int] = Field(default=None, ge=1, le=12)
+    amount: float = Field(default=0.0, ge=0)
+    notes: Optional[str] = None
+
+class BudgetUpdate(BaseModel):
+    name: Optional[str] = None
+    category: Optional[str] = None
+    year: Optional[int] = None
+    month: Optional[int] = Field(default=None, ge=1, le=12)
+    amount: Optional[float] = Field(default=None, ge=0)
+    notes: Optional[str] = None

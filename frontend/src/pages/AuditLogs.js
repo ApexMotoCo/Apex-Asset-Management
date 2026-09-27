@@ -61,7 +61,7 @@ function AuditLogs({ apiUrl, token, email }) {
   return (
     <div style={{ padding: '2rem', maxWidth: '1400px', margin: '0 auto' }}>
       <h1 style={{ color: '#ff5500', fontSize: '1.8rem', marginBottom: '1rem', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
-        🔐 Audit Logs (Super User Only)
+        Audit Logs (Super User Only)
       </h1>
 
       {error && (
@@ -74,7 +74,7 @@ function AuditLogs({ apiUrl, token, email }) {
           marginBottom: '1rem',
           fontWeight: '600'
         }}>
-          ⚠️ {error}
+          WARNING: {error}
         </div>
       )}
 
@@ -161,7 +161,7 @@ function AuditLogs({ apiUrl, token, email }) {
             e.target.style.boxShadow = 'none';
           }}
         >
-          🔄 Refresh
+          RefreshRefresh
         </button>
       </div>
 

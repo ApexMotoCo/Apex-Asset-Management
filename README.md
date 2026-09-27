@@ -1,148 +1,91 @@
 # APEX Asset Management
 
-Enterprise-grade asset tracking and management platform. Built for organizations that need precise control over their asset inventory.
+APEX Asset Management is the central asset inventory and assignment system for APEX.
 
-## Features
+## Current features
 
-- **Complete Asset Lifecycle**: Track assets from acquisition through retirement
-- **Smart Categorization**: Organize assets by type for better inventory control
-- **Status Monitoring**: Real-time status tracking (active, inactive, maintenance, retired)
-- **Comprehensive Tracking**: Serial numbers, purchase dates, valuations, and locations
-- **Enterprise UI**: Modern, responsive interface designed for productivity
-- **Robust API**: RESTful FastAPI backend with full CRUD operations and interactive documentation
+- Automatic asset IDs (`APEX-000001`, `APEX-000002`, ...)
+- Unique QR token generated for every asset
+- QR code displayed for every asset
+- Mobile QR scanner
+- Scan a QR code to open an asset
+- Assign/reassign an asset to an active user
+- Assignment history for every asset
+- Audit logging
+- User management
+- Email invitations with secure 48-hour activation links
+- User password activation/login
+- Default location: **APEX HUB**
+- Asset status, serial number, purchase date, value and category
+- User deactivation
+- Existing bootstrap admin login remains supported
 
-## Tech Stack
+## Stack
 
-- **Backend**: FastAPI, SQLAlchemy, Python 3.11
-- **Frontend**: React 18, Axios
-- **Database**: SQLite (development), easily swappable for PostgreSQL
-- **Containerization**: Docker & Docker Compose
+- Backend: FastAPI + SQLAlchemy
+- Frontend: React 18 + Axios
+- Database: SQLite
+- Containers: Docker Compose
+- QR scanning: html5-qrcode
+- QR generation: qrcode.react
 
-## Quick Start
+## User invitation flow
 
-### Prerequisites
+An admin goes to **User Management** and enters:
 
-- Docker and Docker Compose installed
+- Full name
+- Email
+- Phone (optional)
+- Role
 
-### Running with Docker Compose
+The location is automatically set to **APEX HUB**.
 
-1. Clone the repository:
-```bash
-git clone <repository-url>
-cd Apex-Asset-Management
+The system creates a secure invitation token valid for 48 hours and emails the user an activation link. The user chooses a password and can then sign in.
+
+If SMTP is not configured, the API returns a temporary fallback invitation URL to the administrator so the account can still be activated during setup.
+
+## SMTP configuration
+
+Copy `.env.example` to `.env` and set your SMTP details:
+
+```text
+APP_PUBLIC_URL=https://assets.apexingoodcompany.co.uk
+
+SMTP_HOST=your.smtp.host
+SMTP_PORT=587
+SMTP_USERNAME=noreply@apexingoodcompany.co.uk
+SMTP_PASSWORD=your-password
+SMTP_FROM=noreply@apexingoodcompany.co.uk
+SMTP_USE_TLS=true
 ```
 
-2. Start the application:
-```bash
-docker compose up --pull always
+Use the SMTP service you want APEX Asset Management to send mail through (for example, your APEX/OVH/Zimbra mail service).
+
+## QR workflow
+
+1. Admin creates an asset.
+2. The system automatically generates its asset ID and QR token.
+3. The QR code appears beside the asset.
+4. Scan it from a phone.
+5. The asset opens in the mobile-friendly asset page.
+6. Select a user.
+7. Save the assignment.
+8. The assignment is added to the asset history and audit log.
+
+QR links use the public Asset Management hostname, so the same QR can be printed and reused throughout the asset's lifetime.
+
+## Docker
+
+```powershell
+docker compose up -d --build
 ```
 
-3. Access the application:
-   - **Frontend**: http://localhost:3000
-   - **Backend API**: http://localhost:8000
-   - **API Docs**: http://localhost:8000/docs
+The existing reverse proxy should continue exposing:
 
-### Running Locally (without Docker)
+- `https://assets.apexingoodcompany.co.uk`
 
-#### Backend
-```bash
-cd backend
-python -m venv venv
-source venv/bin/activate  # On Windows: venv\Scripts\activate
-pip install -r requirements.txt
-uvicorn app.main:app --reload
-```
+The backend remains on port 8000 and the frontend on port 3001 on the Docker host.
 
-#### Frontend
-```bash
-cd frontend
-npm install
-npm start
-```
+## Important
 
-## API Endpoints
-
-### Categories
-- `POST /categories` - Create a category
-- `GET /categories` - List all categories
-
-### Assets
-- `POST /assets` - Create an asset
-- `GET /assets` - List all assets
-- `GET /assets/{asset_id}` - Get asset details
-- `PUT /assets/{asset_id}` - Update an asset
-- `DELETE /assets/{asset_id}` - Delete an asset
-
-### Health
-- `GET /health` - Health check endpoint
-
-## Project Structure
-
-```
-Apex-Asset-Management/
-├── backend/
-│   ├── app/
-│   │   ├── __init__.py
-│   │   ├── main.py          # Main API application
-│   │   ├── models.py        # SQLAlchemy models
-│   │   ├── schemas.py       # Pydantic schemas
-│   │   └── database.py      # Database configuration
-│   ├── requirements.txt
-│   └── Dockerfile
-├── frontend/
-│   ├── public/
-│   │   └── index.html
-│   ├── src/
-│   │   ├── components/
-│   │   │   ├── AssetForm.js
-│   │   │   ├── AssetList.js
-│   │   │   └── CategoryForm.js
-│   │   ├── App.js
-│   │   ├── App.css
-│   │   └── index.js
-│   ├── package.json
-│   └── Dockerfile
-├── docker-compose.yml
-├── .gitignore
-└── README.md
-```
-
-## Environment Variables
-
-### Backend
-- `DATABASE_URL` - Database connection string (default: sqlite:///./assets.db)
-
-### Frontend
-- `REACT_APP_API_URL` - Backend API URL (default: http://localhost:8000)
-
-## Development Tips
-
-- Hot reload is enabled for both backend and frontend in docker-compose
-- Backend changes auto-reload with `uvicorn --reload`
-- Frontend changes auto-reload with React's development server
-- Database file is stored in `backend_data` volume for persistence
-
-## Database Schema
-
-### Categories Table
-- `id` (Integer, Primary Key)
-- `name` (String, Unique)
-- `description` (String)
-- `created_at` (DateTime)
-
-### Assets Table
-- `id` (Integer, Primary Key)
-- `name` (String)
-- `description` (String)
-- `category_id` (Foreign Key → Categories)
-- `serial_number` (String, Unique)
-- `purchase_date` (DateTime)
-- `value` (Float)
-- `location` (String)
-- `status` (String: active, inactive, maintenance, retired)
-- `created_at` (DateTime)
-- `updated_at` (DateTime)
-
-## License
-
-MIT License
+The application performs a small startup schema upgrade for existing SQLite databases. Existing assets receive automatic asset IDs and QR tokens, and existing users without a location are assigned **APEX HUB**.

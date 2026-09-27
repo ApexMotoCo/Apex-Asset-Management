@@ -101,17 +101,24 @@ body {
   padding: 0 1.5rem;
 }
 
-.page {
-  animation: fadeIn 0.4s ease forwards;
+.tab-content {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 2rem;
 }
 
 @media (max-width: 1024px) {
-  .page {
-    grid-template-columns: 1fr !important;
+  .tab-content {
+    grid-template-columns: 1fr;
   }
 }
 
 @media (max-width: 768px) {
+  .tab-content {
+    grid-template-columns: 1fr;
+    gap: 1.5rem;
+  }
+  
   .header {
     padding: 1.5rem 1rem;
   }
@@ -119,15 +126,6 @@ body {
   .container {
     margin: 1.5rem auto;
     padding: 0 1rem;
-  }
-  
-  .navbar {
-    padding: 0.8rem 1rem;
-  }
-  
-  .nav-button {
-    padding: 0.6rem 1rem;
-    font-size: 0.8rem;
   }
 }
 
@@ -139,7 +137,6 @@ body {
   border: 2px solid #1f1f1f;
   box-shadow: 0 8px 32px rgba(0, 0, 0, 0.5);
   transition: all 0.3s ease;
-  grid-column: 1 / -1;
 }
 
 .form-section:hover,
@@ -165,10 +162,6 @@ form {
   display: flex;
   flex-direction: column;
   gap: 1rem;
-}
-
-form[style*='grid'] {
-  display: grid;
 }
 
 .form-group {
@@ -302,29 +295,6 @@ button:disabled {
   font-weight: 600;
 }
 
-table {
-  width: 100%;
-  border-collapse: collapse;
-}
-
-thead {
-  background: #111111;
-  border-bottom: 2px solid #1f1f1f;
-}
-
-tr {
-  border-bottom: 1px solid #1f1f1f;
-}
-
-td {
-  padding: 1rem;
-  color: #e5e5e5;
-}
-
-tr:hover {
-  background: #0a0a0a;
-}
-
 .asset-actions {
   display: flex;
   gap: 0.5rem;
@@ -394,29 +364,6 @@ tr:hover {
   border: 2px dashed #1f1f1f;
 }
 
-textarea {
-  padding: 0.8rem;
-  border: 2px solid #1f1f1f;
-  border-radius: 4px;
-  font-size: 0.95rem;
-  font-family: inherit;
-  background: #111111;
-  color: #e5e5e5;
-  transition: all 0.3s ease;
-  resize: vertical;
-}
-
-textarea:hover {
-  border-color: #333;
-}
-
-textarea:focus {
-  outline: none;
-  border-color: #ff5500;
-  background: #0a0a0a;
-  box-shadow: 0 0 0 3px rgba(255, 85, 0, 0.1);
-}
-
 @keyframes fadeIn {
   from {
     opacity: 0;
@@ -428,13 +375,97 @@ textarea:focus {
   }
 }
 
-.page {
-  display: contents;
-}
-
 .asset-card,
 .form-section,
-.list-section,
-.dashboard {
+.list-section {
   animation: fadeIn 0.4s ease forwards;
+}
+
+/* =========================================================
+   APEX ASSET MANAGEMENT - ASSET WORKSPACE
+   ========================================================= */
+.apex-asset-form { gap: 1.25rem; }
+.apex-form-message { position: relative; padding: .9rem 1rem; border-radius: 6px; border: 1px solid; font-weight: 600; line-height: 1.5; }
+.apex-form-message.error { color: #ff7b7b; background: rgba(239,68,68,.10); border-color: rgba(239,68,68,.45); }
+.apex-form-message.success { color: #7ee2a8; background: rgba(34,197,94,.08); border-color: rgba(34,197,94,.35); }
+.apex-form-section-label { color: #ff5500; font-size: .75rem; font-weight: 800; letter-spacing: .14em; text-transform: uppercase; border-bottom: 1px solid #222; padding-bottom: .7rem; }
+.apex-form-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 1rem; }
+.apex-field { display: flex; flex-direction: column; min-width: 0; }
+.apex-field-wide { grid-column: 1 / -1; }
+.apex-field label { margin-bottom: .45rem; }
+.apex-field input, .apex-field select, .apex-field textarea { width: 100%; }
+.apex-form-footer { display: flex; align-items: center; justify-content: space-between; gap: 1rem; padding-top: .5rem; }
+.apex-form-hint { color: #707070; font-size: .78rem; line-height: 1.5; max-width: 55%; }
+.apex-orange-button, .apex-secondary-button, .apex-danger-button { border-radius: 5px; padding: .72rem 1rem; font-weight: 800; font-size: .78rem; letter-spacing: .04em; text-transform: uppercase; }
+.apex-orange-button { background: linear-gradient(135deg,#ff5500,#ff7626); color: #fff; border: 1px solid #ff5500; }
+.apex-secondary-button { background: #151515; color: #ddd; border: 1px solid #333; box-shadow: none; }
+.apex-secondary-button:hover { background: #202020; border-color: #ff5500; color: #fff; }
+.apex-danger-button { background: rgba(220,38,38,.10); color: #ff7777; border: 1px solid rgba(220,38,38,.45); box-shadow: none; }
+.apex-danger-button:hover { background: rgba(220,38,38,.2); border-color: #ef4444; }
+.apex-orange-button.small, .apex-secondary-button.small, .apex-danger-button.small { padding: .55rem .72rem; font-size: .7rem; }
+.apex-assets-panel { width: 100%; }
+.apex-asset-toolbar { display: grid; grid-template-columns: minmax(220px,2fr) repeat(3,minmax(130px,1fr)); gap: .75rem; padding: 1rem; background: #080808; border: 1px solid #222; border-radius: 7px; margin-bottom: 1rem; }
+.apex-asset-search, .apex-filter-field { min-width: 0; }
+.apex-asset-toolbar label { display: block; font-size: .68rem; margin-bottom: .35rem; color: #777; }
+.apex-asset-toolbar input, .apex-asset-toolbar select { width: 100%; padding: .7rem .75rem; font-size: .85rem; }
+.apex-asset-results-bar { display: flex; align-items: center; justify-content: space-between; gap: 1rem; color: #777; font-size: .78rem; margin-bottom: .9rem; }
+.apex-asset-results-bar strong { color: #ddd; }
+.apex-link-button { background: none; border: 0; box-shadow: none; padding: 0; color: #ff5500; text-transform: none; letter-spacing: 0; font-size: .78rem; }
+.apex-link-button:hover { background: none; box-shadow: none; transform: none; text-decoration: underline; }
+.apex-message-close { float: right; background: none; border: 0; box-shadow: none; padding: 0 .25rem; color: inherit; font-size: 1.2rem; line-height: 1; text-transform: none; }
+.apex-asset-grid { display: grid; grid-template-columns: repeat(auto-fill,minmax(430px,1fr)); gap: 1rem; }
+.apex-asset-card { background: linear-gradient(145deg,#111 0%,#0b0b0b 100%); border: 1px solid #252525; border-left: 3px solid #ff5500; border-radius: 7px; padding: 1.15rem; min-width: 0; transition: .2s ease; }
+.apex-asset-card:hover { border-color: #ff5500; box-shadow: 0 12px 35px rgba(0,0,0,.45); transform: translateY(-1px); }
+.apex-asset-card-top { display: flex; align-items: flex-start; justify-content: space-between; gap: .75rem; margin-bottom: 1rem; }
+.apex-asset-id { color: #ff5500; font-size: .7rem; font-weight: 900; letter-spacing: .12em; }
+.apex-asset-card h3 { margin: .2rem 0 0; color: #f2f2f2; font-size: 1.05rem; }
+.apex-asset-status { display: inline-flex; align-items: center; border: 1px solid #444; border-radius: 999px; padding: .28rem .6rem; font-size: .65rem; font-weight: 800; text-transform: uppercase; letter-spacing: .06em; white-space: nowrap; }
+.apex-asset-status.active { color: #7ee2a8; border-color: rgba(34,197,94,.35); background: rgba(34,197,94,.08); }
+.apex-asset-status.inactive { color: #ff9b9b; border-color: rgba(239,68,68,.35); background: rgba(239,68,68,.08); }
+.apex-asset-status.maintenance { color: #ffc46b; border-color: rgba(245,158,11,.35); background: rgba(245,158,11,.08); }
+.apex-asset-status.retired { color: #aaa; background: rgba(107,114,128,.08); }
+.apex-asset-card-body { display: grid; grid-template-columns: 1fr 145px; gap: 1rem; align-items: center; }
+.apex-asset-details { display: grid; grid-template-columns: repeat(2,minmax(0,1fr)); gap: .75rem; }
+.apex-asset-details div { min-width: 0; }
+.apex-asset-details span { display: block; color: #666; font-size: .65rem; text-transform: uppercase; letter-spacing: .08em; margin-bottom: .2rem; }
+.apex-asset-details strong { display: block; color: #ddd; font-size: .82rem; overflow-wrap: anywhere; }
+.apex-asset-qr { display: flex; flex-direction: column; align-items: center; gap: .35rem; }
+.apex-asset-qr > div { background: #fff; padding: 4px; border-radius: 4px; }
+.apex-asset-qr span { color: #777; font-size: .6rem; font-weight: 800; letter-spacing: .1em; }
+.apex-asset-description { margin-top: 1rem; padding-top: .8rem; border-top: 1px solid #222; color: #888; font-size: .78rem; line-height: 1.55; }
+.apex-asset-actions { display: flex; flex-wrap: wrap; gap: .45rem; margin-top: 1rem; padding-top: .85rem; border-top: 1px solid #222; }
+.apex-assignment-panel { display: grid; grid-template-columns: 1.2fr 1.5fr auto; gap: .7rem; align-items: end; margin-top: .8rem; padding: .9rem; background: #080808; border: 1px solid #292929; border-radius: 5px; }
+.apex-assignment-panel strong, .apex-assignment-panel span { display: block; }
+.apex-assignment-panel strong { color: #ff5500; font-size: .78rem; }
+.apex-assignment-panel span { color: #666; font-size: .68rem; margin-top: .2rem; }
+.apex-assignment-panel select { width: 100%; }
+.apex-history-panel { margin-top: .8rem; padding: .9rem; background: #080808; border: 1px solid #292929; border-radius: 5px; color: #777; font-size: .75rem; }
+.apex-history-title { color: #ff5500; font-weight: 800; text-transform: uppercase; letter-spacing: .08em; font-size: .68rem; margin-bottom: .4rem; }
+.apex-history-row { padding: .65rem 0; border-top: 1px solid #1f1f1f; }
+.apex-history-row div { display: flex; gap: .5rem; flex-wrap: wrap; }
+.apex-history-row strong { color: #ddd; font-size: .72rem; }
+.apex-history-row span { color: #aaa; font-size: .72rem; }
+.apex-history-row small { color: #666; font-size: .65rem; }
+.apex-edit-panel { margin-top: .5rem; padding: .9rem; background: #080808; border: 1px solid #292929; border-radius: 5px; }
+.apex-inline-actions { display: flex; gap: .5rem; margin-top: .8rem; }
+.apex-empty-assets { padding: 3rem 1rem; text-align: center; border: 1px dashed #292929; border-radius: 7px; background: #080808; }
+.apex-empty-icon { color: #ff5500; font-size: 2.2rem; margin-bottom: .5rem; }
+.apex-empty-assets h3 { margin: 0; color: #ddd; }
+.apex-empty-assets p { color: #666; font-size: .8rem; }
+
+@media (max-width: 900px) {
+  .apex-asset-toolbar { grid-template-columns: 1fr 1fr; }
+  .apex-asset-search { grid-column: 1 / -1; }
+  .apex-assignment-panel { grid-template-columns: 1fr; }
+}
+
+@media (max-width: 650px) {
+  .apex-form-grid, .apex-asset-details, .apex-asset-card-body { grid-template-columns: 1fr; }
+  .apex-field-wide { grid-column: auto; }
+  .apex-form-footer { align-items: stretch; flex-direction: column; }
+  .apex-form-hint { max-width: none; }
+  .apex-asset-toolbar { grid-template-columns: 1fr; }
+  .apex-asset-search { grid-column: auto; }
+  .apex-asset-grid { grid-template-columns: 1fr; }
+  .apex-asset-qr { align-items: flex-start; }
 }

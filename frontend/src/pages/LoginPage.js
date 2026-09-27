@@ -3,6 +3,7 @@ import axios from 'axios';
 
 function LoginPage({ onLoginSuccess, apiUrl }) {
   const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
@@ -11,20 +12,28 @@ function LoginPage({ onLoginSuccess, apiUrl }) {
     e.preventDefault();
     setError('');
     setSuccess('');
+    const normalizedEmail = email.trim().toLowerCase();
+    if (!normalizedEmail) {
+      setError('Please enter your email address.');
+      return;
+    }
     setLoading(true);
 
     try {
-      const response = await axios.post(`${apiUrl}/login`, { email });
+      const response = await axios.post(`${apiUrl}/login`, { email: normalizedEmail, password: password || undefined });
       localStorage.setItem('admin_token', response.data.access_token);
       localStorage.setItem('admin_email', response.data.email);
+      localStorage.setItem('admin_role', response.data.role || 'member');
       setSuccess('Login successful! Redirecting...');
-      setTimeout(() => {
-        onLoginSuccess(response.data.access_token, response.data.email);
-      }, 1000);
+      onLoginSuccess(response.data.access_token, response.data.email, response.data.role || 'member');
     } catch (err) {
-      setError(err.response?.data?.detail || 'Login failed. Please check your details or contact an administrator.');
+      const detail = err.response?.data?.detail;
+      setError(typeof detail === 'string'
+        ? detail
+        : 'Login failed. Please use an authorized email address.');
+    } finally {
+      setLoading(false);
     }
-    setLoading(false);
   };
 
   return (
@@ -66,7 +75,7 @@ function LoginPage({ onLoginSuccess, apiUrl }) {
               fontSize: '0.9rem',
               fontWeight: '600'
             }}>
-              ⚠️ {error}
+              WARNING: {error}
             </div>
           )}
           {success && (
@@ -80,7 +89,7 @@ function LoginPage({ onLoginSuccess, apiUrl }) {
               fontSize: '0.9rem',
               fontWeight: '600'
             }}>
-              ✓ {success}
+              OK: {success}
             </div>
           )}
 
@@ -100,7 +109,7 @@ function LoginPage({ onLoginSuccess, apiUrl }) {
               type="email"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
-              placeholder="Enter your email address"
+              placeholder="support@apexingoodcompany.co.uk"
               required
               style={{
                 width: '100%',
@@ -125,6 +134,30 @@ function LoginPage({ onLoginSuccess, apiUrl }) {
                 e.target.style.boxShadow = 'none';
               }}
             />
+          </div>
+
+          <div style={{ marginBottom: '1.5rem' }}>
+            <label style={{
+              display: 'block', color: '#ff5500', fontWeight: '600',
+              marginBottom: '0.5rem', fontSize: '0.9rem',
+              textTransform: 'uppercase', letterSpacing: '0.05em'
+            }}>
+              Password
+            </label>
+            <input
+              type="password"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              placeholder="Enter your password (invited users)"
+              style={{
+                width: '100%', padding: '0.8rem', border: '2px solid #1f1f1f',
+                borderRadius: '4px', background: '#111111', color: '#e5e5e5',
+                fontSize: '0.95rem', boxSizing: 'border-box'
+              }}
+            />
+            <small style={{display:'block',marginTop:'.4rem',color:'#777'}}>
+              Existing APEX administrators can leave this blank.
+            </small>
           </div>
 
           <button
@@ -159,7 +192,7 @@ function LoginPage({ onLoginSuccess, apiUrl }) {
               e.target.style.background = 'linear-gradient(135deg, #ff5500 0%, #ff7722 100%)';
             }}
           >
-            {loading ? 'Logging in...' : '🔐 Login'}
+            {loading ? 'Logging in...' : 'Login'}
           </button>
         </form>
 
@@ -168,10 +201,12 @@ function LoginPage({ onLoginSuccess, apiUrl }) {
           paddingTop: '1.5rem',
           borderTop: '1px solid #1f1f1f',
           textAlign: 'center',
-          color: '#777',
+          color: '#666',
           fontSize: '0.85rem'
         }}>
-          If you are unable to login, please contact an administrator.
+          Authorized email addresses only<br />
+          support@apexingoodcompany.co.uk<br />
+          business@apexingoodcompany.co.uk
         </div>
       </div>
     </div>
